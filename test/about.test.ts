@@ -35,15 +35,15 @@ describe('about-her memory', () => {
   it('injects the dossier + guardrails into the system prompt', async () => {
     const llm = capturingLlm();
     await composeMessage(brief, llm, [], 0, '• she calls Rishabh "Rishu"\n• chai obsessive');
-    expect(llm.lastSystem).toContain('ABOUT HER');
+    expect(llm.lastSystem).toContain('ABOUT HER (notes from Rishabh');
     expect(llm.lastSystem).toContain('Rishu');
     expect(llm.lastSystem).toContain('Never use these to guilt');
   });
 
-  it('omits the block entirely when no notes exist', async () => {
+  it('omits the dossier block entirely when no notes exist', async () => {
     const llm = capturingLlm();
     await composeMessage(brief, llm, [], 0, null);
-    expect(llm.lastSystem).not.toContain('ABOUT HER');
+    expect(llm.lastSystem).not.toContain('ABOUT HER (notes from Rishabh');
   });
 
   it('/note appends, /about shows, /name renames, /about clear wipes', async () => {
