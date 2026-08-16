@@ -137,6 +137,7 @@ export async function handleAdmin(deps: TickDeps, admin: User, msg: InboundMessa
     case 'soft': {
       if (arg === 'on') {
         await repo.updateUser(deps.db, player.id, { soft_until: nextWakeStartMs(nowMs, player) });
+        await repo.setState(deps.db, `soft_day:${localDay(now, player.tz)}`, '1');
         await sendPlain(deps, admin, 'Soft mode ON until tomorrow morning.', nowMs);
       } else if (arg === 'off') {
         await repo.updateUser(deps.db, player.id, { soft_until: null });

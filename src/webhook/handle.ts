@@ -32,6 +32,7 @@ export async function handleInbound(deps: TickDeps, msg: InboundMessage): Promis
   });
   if (ins.duplicate) return;
   if (!user) return; // unknown sender: logged, never answered
+  if (msg.kind === 'reaction') return; // reactions don't reopen Meta's 24h window — never treat as inbound
 
   await repo.updateUser(db, user.id, { last_inbound_at: now.getTime() });
   user.last_inbound_at = now.getTime(); // escalation + window state see the fresh value
@@ -66,16 +67,19 @@ export async function handleInbound(deps: TickDeps, msg: InboundMessage): Promis
 
   if (msg.kind !== 'text' || !msg.text) {
     // audio/image/etc: acknowledge kindly, don't pretend to understand
-    await sendReply(deps, user, 'smalltalk_reply', { herMessage: `she sent a ${msg.kind} message` }, now.getTime());
+    const what = msg.kind === 'audio' ? 'a voice note' : msg.kind === 'image' ? 'a photo' : 'something the bot cannot read yet';
+    await sendReply(deps, user, 'smalltalk_reply', { herMessage: `she sent ${what}` }, now.getTime());
     return;
   }
 
   const day = localDay(now, user.tz);
-  const [habits, logsToday, recent] = await Promise.all([
+  const [habits, logsToday, recentAll] = await Promise.all([
     repo.getActiveHabits(db, user.id),
     repo.logsForDay(db, user.id, day),
     repo.recentMessages(db, user.id, 8),
   ]);
+  // The current message was already inserted above — keep it out of "recent".
+  const recent = recentAll.filter((m) => m.wa_message_id !== msg.wamid);
   const intent = await parseIntent(msg.text, user, habits, logsToday, recent, deps.llm, now);
   await applyIntent(deps, user, intent, now, 'text');
 }

@@ -156,6 +156,7 @@ export async function applyIntent(
     case 'set_mode': {
       if (intent.mode === 'soft') {
         await repo.updateUser(deps.db, user.id, { soft_until: nextWakeStartMs(nowMs, user) });
+        await repo.setState(deps.db, `soft_day:${day}`, '1'); // exact marker for rollover
         await sendReply(deps, user, 'soft_ack', {}, nowMs);
       } else {
         await repo.updateUser(deps.db, user.id, { soft_until: null });

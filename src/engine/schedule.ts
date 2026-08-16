@@ -17,12 +17,16 @@ export function isDueOn(habit: Habit, day: string): boolean {
   }
 }
 
-/** Habit window intersected with the user's wake window, in minutes-into-day. */
-export function dueWindow(habit: Habit, user: User): { startMin: number; endMin: number } {
+/**
+ * Habit window intersected with the user's wake window, in minutes-into-day.
+ * Returns null when they don't overlap (e.g. an early-morning habit for a
+ * late riser) — the habit is then never nudged rather than paced all day.
+ */
+export function dueWindow(habit: Habit, user: User): { startMin: number; endMin: number } | null {
   const wakeStart = hmToMin(user.wake_start);
   const wakeEnd = hmToMin(user.wake_end);
   const start = Math.max(habit.window_start ? hmToMin(habit.window_start) : wakeStart, wakeStart);
   const end = Math.min(habit.window_end ? hmToMin(habit.window_end) : wakeEnd, wakeEnd);
-  if (end <= start) return { startMin: wakeStart, endMin: wakeEnd };
+  if (end <= start) return null;
   return { startMin: start, endMin: end };
 }

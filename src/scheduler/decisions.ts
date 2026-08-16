@@ -43,10 +43,12 @@ export function decide(s: Snapshot): TickDecision[] {
   }
   if (!s.windowOpen) return [];
 
-  // 2. Sunday report card.
+  // 2. Sunday report card (an hour before window close for early sleepers,
+  //    so it stays reachable inside the quiet-hours guard).
+  const reportMin = Math.min(CONFIG.REPORT_HOUR_MIN, wakeEnd - 60);
   if (
     s.isSunday &&
-    s.localMin >= CONFIG.REPORT_HOUR_MIN &&
+    s.localMin >= reportMin &&
     s.lastReportWeek !== s.weekKey &&
     !sent.some((n) => n.kind === 'report')
   ) {
@@ -108,13 +110,16 @@ export function decide(s: Snapshot): TickDecision[] {
         {
           kind: 'reminder',
           habitId: h.id,
-          escalation: level,
+          // Global unresponsiveness drives drama, but a habit's own nudge count
+          // caps it — its first reminder of the day is never the theatrical one.
+          escalation: Math.min(level, habNudges.length),
           facts: { habit: h.name, emoji: h.emoji, unit: h.unit, streak: s.streaks[h.id]?.current ?? 0 },
         },
       ];
     }
 
     const win = dueWindow(h, u);
+    if (!win) continue; // habit window doesn't overlap her wake window
     const done = doneUnits(h.id, s.logsToday);
     const r = waterDecision({
       target: h.target_count,
@@ -134,7 +139,7 @@ export function decide(s: Snapshot): TickDecision[] {
         {
           kind: r.kind,
           habitId: h.id,
-          escalation: r.kind === 'catchup' ? Math.min(level, 1) : level,
+          escalation: Math.min(level, habNudges.length, r.kind === 'catchup' ? 1 : 3),
           facts: {
             habit: h.name,
             emoji: h.emoji,

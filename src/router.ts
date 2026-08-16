@@ -21,6 +21,10 @@ app.post('/webhook', async (c) => {
   const raw = await c.req.text();
 
   if (c.env.DEV_SKIP_SIGNATURE !== '1') {
+    if (!c.env.WA_APP_SECRET) {
+      console.error('WA_APP_SECRET secret is not set — rejecting all webhooks');
+      return c.text('server not configured', 500);
+    }
     const ok = await verifySignature(raw, c.req.header('x-hub-signature-256') ?? null, c.env.WA_APP_SECRET);
     if (!ok) return c.text('bad signature', 401);
   }

@@ -1,7 +1,7 @@
 export interface InboundMessage {
   waId: string;
   wamid: string;
-  kind: 'text' | 'button' | 'audio' | 'image' | 'other';
+  kind: 'text' | 'button' | 'audio' | 'image' | 'reaction' | 'other';
   text?: string;
   buttonId?: string;
   buttonTitle?: string;
@@ -63,6 +63,9 @@ export function parseWebhook(payload: unknown): { messages: InboundMessage[] } {
             break;
           case 'image':
             messages.push({ ...base, kind: 'image', text: m.image?.caption });
+            break;
+          case 'reaction': // reactions do NOT reopen the 24h window on Meta's side
+            messages.push({ ...base, kind: 'reaction' });
             break;
           default:
             messages.push({ ...base, kind: 'other' });

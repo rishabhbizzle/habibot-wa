@@ -1,4 +1,4 @@
-import { daysBetween, dayOfWeekMon0 } from '../core/clock';
+import { addDays, daysBetween, dayOfWeekMon0 } from '../core/clock';
 import { pluralize } from '../core/text';
 import type { ChallengeRule, Habit, HabitLog, Streak } from '../core/types';
 import { isDueOn } from './schedule';
@@ -151,11 +151,16 @@ export function nextChallenge(
     );
   }
   if (once) {
-    list.push({
-      title: `Don't miss a single ${once.name.toLowerCase()} day this week`,
-      rule: { type: 'habit_days', habit_id: once.id, days: 3 },
-      reward_points: 25,
-    });
+    // "Don't miss a day" must grade against the actual due days NEXT week.
+    const nextWeek = Array.from({ length: 7 }, (_, i) => addDays(weekStart, 7 + i));
+    const dueDays = nextWeek.filter((d) => isDueOn(once, d)).length;
+    if (dueDays > 0) {
+      list.push({
+        title: `Don't miss a single ${once.name.toLowerCase()} day this week (${dueDays} due)`,
+        rule: { type: 'habit_days', habit_id: once.id, days: dueDays },
+        reward_points: 25,
+      });
+    }
   }
   if (list.length === 0) {
     list.push({

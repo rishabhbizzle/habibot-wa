@@ -200,19 +200,19 @@ function habitCard(h, isNew){
     + f('Target/day','tc',h.target_count) + f('Unit','un',h.unit,'glass')
     +'<div><label>Pacing</label><select id="h_pc_'+i+'"><option'+(h.pacing==='once'?' selected':'')+'>once</option><option'+(h.pacing==='spread'?' selected':'')+'>spread</option></select></div>'
     + f('Max nags/day','nm',h.nag_max_per_day) + f('Min gap (min)','ng',h.nag_min_gap_min) + f('Points','pt',h.points)
-    +'<div style="align-self:end"><button class="primary" onclick="saveHabit(\\''+i+'\\','+(isNew?1:0)+')">'+(isNew?'Create':'Save')+'</button></div>'
+    +'<div style="align-self:end"><button class="primary" onclick="saveHabit(\\''+i+'\\','+(isNew?1:0)+','+(isNew||h.active?1:0)+')">'+(isNew?'Create':'Save')+'</button></div>'
     +'</div></details>';
 }
 
 function gv(id,i){ var el=document.getElementById('h_'+id+'_'+i); return el?el.value.trim():''; }
-function saveHabit(i,isNew){
+function saveHabit(i,isNew,act){
   var body = {
     id: gv('id',i), name: gv('name',i), emoji: gv('emoji',i),
     schedule_type: document.getElementById('h_st_'+i).value,
     interval_days: gv('in',i)||null, anchor_date: gv('ad',i)||null, weekly_days: gv('wd',i)||null,
     anchor_time: gv('at',i)||null, window_start: gv('ws',i)||null, window_end: gv('we',i)||null,
     target_count: gv('tc',i), unit: gv('un',i), pacing: document.getElementById('h_pc_'+i).value,
-    nag_max_per_day: gv('nm',i), nag_min_gap_min: gv('ng',i), points: gv('pt',i), active: 1
+    nag_max_per_day: gv('nm',i), nag_min_gap_min: gv('ng',i), points: gv('pt',i), active: act ? 1 : 0
   };
   api('/habits', body).then(function(){ toast(isNew?'Habit created':'Habit saved'); load(); });
 }
@@ -224,7 +224,7 @@ function addCoupon(){
 }
 function delCoupon(id){ if(confirm('Delete this coupon?')) api('/coupons/delete',{id:id}).then(function(){ load(); }); }
 function mode(m){ api('/mode',m).then(function(){ toast('Done'); load(); }); }
-function tick(){ api('/tick').then(function(r){ toast('Tick: '+(r.sent&&r.sent.length? r.sent.map(function(s){return s.kind;}).join(', '):'nothing to send')); load(); }); }
+function tick(){ api('/tick',{}).then(function(r){ toast('Tick: '+(r.sent&&r.sent.length? r.sent.map(function(s){return s.kind;}).join(', '):'nothing to send')); load(); }); }
 function testMsg(){ api('/test',{what:document.getElementById('testSel').value}).then(function(){ toast('Sent to your WhatsApp'); }); }
 function saveUser(){
   api('/user',{ wake_start:document.getElementById('uWs').value, wake_end:document.getElementById('uWe').value,

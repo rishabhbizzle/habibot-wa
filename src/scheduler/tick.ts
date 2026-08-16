@@ -5,6 +5,7 @@ import { repo, type Db } from '../db/repo';
 import { CONFIG } from '../env';
 import { pickCoupon } from '../engine/coupons';
 import { rolloverDay } from '../engine/rollover';
+import { isDueOn } from '../engine/schedule';
 import { buildBrief } from '../composer/briefs';
 import { composeMessage } from '../composer/compose';
 import type { Llm } from '../llm/anthropic';
@@ -88,10 +89,8 @@ async function maybeRollover(deps: TickDeps, player: User, today: string, nowMs:
 
   for (let day = start; day <= yday; day = addDays(day, 1)) {
     const logs = await repo.logsForDay(db, player.id, day);
-    // Approximation: soft mode auto-expires next morning, so a soft_until within
-    // the last ~36h means yesterday ran soft.
-    const softDay =
-      day === yday && player.soft_until !== null && Math.abs(nowMs - player.soft_until) < 36 * 3600_000;
+    // Exact: soft-mode activation stamps a per-day marker (see setSoftDayMarker).
+    const softDay = (await repo.getState(db, `soft_day:${day}`)) === '1';
     const res = rolloverDay({ day, userId: player.id, habits, logs, streaks, softDay });
     for (const s of res.streakUpdates) {
       streaks[s.key] = s;
@@ -177,6 +176,7 @@ function buttonsFor(d: TickDecision, snap: Snapshot): ButtonSpec[] {
     const due = snap.habits.filter(
       (h) =>
         h.active === 1 &&
+        isDueOn(h, snap.localDay) &&
         !snap.logsToday.some((l) => l.habit_id === h.id && l.status === 'skipped') &&
         snap.logsToday.filter((l) => l.habit_id === h.id && l.status === 'done').reduce((s, l) => s + l.count, 0) <
           h.target_count,

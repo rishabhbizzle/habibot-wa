@@ -11,6 +11,7 @@ import { nextWakeStartMs } from '../flows/logging';
 import { isSoft } from '../scheduler/decisions';
 import { windowOpen } from '../scheduler/snapshot';
 import { runTick } from '../scheduler/tick';
+import { timingSafeEqual } from '../webhook/verify';
 
 const HM = /^\d{2}:\d{2}$/;
 const HABIT_ID = /^[a-z0-9_-]{2,24}$/;
@@ -21,7 +22,8 @@ export const adminApi = new Hono<{ Bindings: Env }>();
 adminApi.use('*', async (c, next) => {
   const key = c.env.ADMIN_KEY;
   if (!key) return c.json({ error: 'ADMIN_KEY secret not set on the worker' }, 503);
-  if (c.req.header('authorization') !== `Bearer ${key}`) return c.json({ error: 'unauthorized' }, 401);
+  const auth = c.req.header('authorization') ?? '';
+  if (!timingSafeEqual(auth, `Bearer ${key}`)) return c.json({ error: 'unauthorized' }, 401);
   await next();
 });
 
@@ -174,6 +176,7 @@ adminApi.post('/mode', async (c) => {
   const now = Date.now();
   if (typeof b.soft === 'boolean') {
     await repo.updateUser(deps.db, player.id, { soft_until: b.soft ? nextWakeStartMs(now, player) : null });
+    if (b.soft) await repo.setState(deps.db, `soft_day:${localDay(new Date(now), player.tz)}`, '1');
   }
   if (typeof b.pause_hours === 'number') {
     await repo.updateUser(deps.db, player.id, {

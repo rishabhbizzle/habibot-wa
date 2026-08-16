@@ -21,12 +21,12 @@ export async function sendReply(
   facts: Facts,
   nowMs: number,
   buttons?: ButtonSpec[],
-): Promise<string> {
+): Promise<{ text: string; ok: boolean }> {
   const brief = replyBrief(kind, user, nowMs, facts);
   const recent = await recentOutbound(deps.db, user.id);
   const { text, fallback } = await composeMessage(brief, deps.llm, recent, Math.floor(nowMs / 60000) % 7, user.about);
-  await deliver(deps, user, kind, text, JSON.stringify({ ...brief, fallback }), nowMs, buttons);
-  return text;
+  const ok = await deliver(deps, user, kind, text, JSON.stringify({ ...brief, fallback }), nowMs, buttons);
+  return { text, ok };
 }
 
 /** Send fixed text (admin replies, lists — no persona, no LLM). */
@@ -36,8 +36,8 @@ export async function sendPlain(
   text: string,
   nowMs: number,
   buttons?: ButtonSpec[],
-): Promise<void> {
-  await deliver(deps, user, 'plain', text, null, nowMs, buttons);
+): Promise<boolean> {
+  return deliver(deps, user, 'plain', text, null, nowMs, buttons);
 }
 
 async function deliver(
@@ -48,7 +48,7 @@ async function deliver(
   brief: string | null,
   nowMs: number,
   buttons?: ButtonSpec[],
-): Promise<void> {
+): Promise<boolean> {
   const res =
     buttons && buttons.length > 0
       ? await deps.send.buttons(user.wa_id, text, buttons)
@@ -63,4 +63,5 @@ async function deliver(
     status: res.ok ? (res.skipped ?? 'sent') : 'failed',
     created_at: nowMs,
   });
+  return res.ok;
 }

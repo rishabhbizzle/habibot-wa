@@ -69,16 +69,21 @@ export async function fireDueReminders(deps: TickDeps, player: User, now: Date):
   const due = await repo.dueReminders(deps.db, player.id, nowMs);
   let fired = 0;
   for (const r of due) {
-    // Mark first so a compose/send crash can't double-fire on the next tick.
+    // Mark first so a mid-send crash can't double-fire; an ordinary send
+    // failure reverts to pending so the reminder retries next tick.
     await repo.markReminderSent(deps.db, r.id);
     const lateMin = Math.round((nowMs - r.due_at) / 60000);
-    await sendReply(
+    const { ok } = await sendReply(
       deps,
       player,
       'reminder_fire',
       { text: r.text, setFor: localHM(new Date(r.due_at), player.tz), late: lateMin > 30 },
       nowMs,
     );
+    if (!ok) {
+      await deps.db.run("UPDATE reminders SET status = 'pending' WHERE id = ?", r.id);
+      continue;
+    }
     fired += 1;
   }
   return fired;
