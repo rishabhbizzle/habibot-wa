@@ -77,6 +77,11 @@ describe('onboarding window parsing', () => {
     expect(parseWindowText('9 to 10')).toEqual({ start: '09:00', end: '22:00' });
   });
 
+  it('clamps night-owl windows at midnight', () => {
+    expect(parseWindowText('10am to 4am')).toEqual({ start: '10:00', end: '23:59', clamped: true });
+    expect(parseWindowText('11 am to 2am')).toEqual({ start: '11:00', end: '23:59', clamped: true });
+  });
+
   it('rejects nonsense', () => {
     expect(parseWindowText('whenever')).toBeNull();
     expect(parseWindowText('9pm to 9am')).toBeNull();

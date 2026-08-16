@@ -45,7 +45,14 @@ function matchLang(input: string): Lang | null {
   return null;
 }
 
-export function parseWindowText(input: string): { start: string; end: string } | null {
+export interface ParsedWindow {
+  start: string;
+  end: string;
+  /** true when a past-midnight end ("10am to 4am") was clamped to 23:59 */
+  clamped?: boolean;
+}
+
+export function parseWindowText(input: string): ParsedWindow | null {
   const m = input.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*(?:to|-|–|se|till|until)\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
   if (!m) return null;
   let sh = Number(m[1]);
@@ -63,8 +70,15 @@ export function parseWindowText(input: string): { start: string; end: string } |
   if (!eap && end <= start && eh < 12) end += 12 * 60; // "10 to 9" -> 10:00-21:00
   // No meridiems and an implausibly short waking window -> the end is pm ("10 se 11" = 10:00-23:00).
   if (!sap && !eap && end - start < 4 * 60 && eh < 12) end += 12 * 60;
+  // Night owl: an explicit past-midnight end ("10am to 4am") — the engine's day
+  // ends at midnight, so cover her until 23:59 and say so.
+  let clamped = false;
+  if (eap === 'am' && end <= start) {
+    end = 23 * 60 + 59;
+    clamped = true;
+  }
   if (end <= start || end - start < 4 * 60 || sh > 23 || eh > 23 || sm > 59 || em > 59) return null;
-  return { start: minToHM(start), end: minToHM(end) };
+  return clamped ? { start: minToHM(start), end: minToHM(end), clamped: true } : { start: minToHM(start), end: minToHM(end) };
 }
 
 async function setStep(deps: TickDeps, user: User, step: Extract<ConvoState, { kind: 'onboarding' }>['step']): Promise<void> {
@@ -142,8 +156,9 @@ export async function onboardingStep(deps: TickDeps, user: User, msg: InboundMes
           if (res?.name === 'set_window') {
             const s = String(res.input.start ?? '');
             const e = String(res.input.end ?? '');
-            if (/^\d{2}:\d{2}$/.test(s) && /^\d{2}:\d{2}$/.test(e) && hmToMin(e) > hmToMin(s)) {
-              win = { start: s, end: e };
+            if (/^\d{2}:\d{2}$/.test(s) && /^\d{2}:\d{2}$/.test(e)) {
+              if (hmToMin(e) > hmToMin(s)) win = { start: s, end: e };
+              else if (hmToMin(s) >= 4 * 60) win = { start: s, end: '23:59', clamped: true }; // past-midnight end
             }
           }
         } catch {
@@ -151,7 +166,7 @@ export async function onboardingStep(deps: TickDeps, user: User, msg: InboundMes
         }
       }
       if (!win) {
-        await sendPlain(deps, user, 'Hmm, try like this: "9am to 9pm"', nowMs);
+        await sendPlain(deps, user, 'Hmm, try like this: "9am to 9pm" (or "10am to 4am" if you’re a night owl)', nowMs);
         return;
       }
       await finish(deps, user, win, now);
@@ -160,7 +175,15 @@ export async function onboardingStep(deps: TickDeps, user: User, msg: InboundMes
   }
 }
 
-async function finish(deps: TickDeps, user: User, win: { start: string; end: string }, now: Date): Promise<void> {
+async function finish(deps: TickDeps, user: User, win: ParsedWindow, now: Date): Promise<void> {
+  if (win.clamped) {
+    await sendPlain(
+      deps,
+      user,
+      `Noted, night owl 🦉 One thing: I clock out at midnight (late-night me is still in training). I’ve got you covered ${win.start}–23:59, then I’ll see you in the morning.`,
+      now.getTime(),
+    );
+  }
   await repo.updateUser(deps.db, user.id, { wake_start: win.start, wake_end: win.end, convo_state: null });
   const updated = { ...user, wake_start: win.start, wake_end: win.end, convo_state: null };
   const day = localDay(now, user.tz);
