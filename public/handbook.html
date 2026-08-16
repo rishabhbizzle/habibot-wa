@@ -135,6 +135,12 @@
   }
   .cheat:last-child { border-bottom: none; }
   .cheat em { font-style: normal; color: var(--dim); font-size: 0.9rem; text-align: right; }
+  .keys { display: flex; flex-wrap: wrap; gap: 4px; flex-shrink: 0; max-width: 60%; }
+  @media (max-width: 540px) {
+    .cheat { flex-direction: column; align-items: flex-start; gap: 4px; padding: 10px 2px; }
+    .keys { max-width: 100%; }
+    .cheat em { text-align: left; font-size: 0.85rem; }
+  }
   .fine { color: var(--dim); font-size: 0.92rem; }
   .love {
     text-align: center;
@@ -234,16 +240,16 @@
     <div class="eyebrow">Cheat sheet</div>
     <h2>Everything it understands</h2>
     <div class="cheats">
-      <div class="cheat"><span class="say">done · ho gaya</span><em>logs the thing you obviously mean</em></div>
-      <div class="cheat"><span class="say">2 · had 2 glasses</span><em>logs that many glasses</em></div>
-      <div class="cheat"><span class="say">snooze</span><em>back in an hour</em></div>
-      <div class="cheat"><span class="say">skip</span><em>skips today, streak freezes</em></div>
-      <div class="cheat"><span class="say">status</span><em>progress + streaks + points</em></div>
-      <div class="cheat"><span class="say">redeem</span><em>see &amp; claim rewards</em></div>
-      <div class="cheat"><span class="say">remind me to … at …</span><em>personal reminder</em></div>
-      <div class="cheat"><span class="say">reminders</span><em>list them · cancel by number</em></div>
-      <div class="cheat"><span class="say">rough day</span><em>gentle mode till tomorrow</em></div>
-      <div class="cheat"><span class="say">be nicer · roast me · pet mode</span><em>new personality, instantly</em></div>
+      <div class="cheat"><span class="keys"><span class="say">done</span><span class="say">ho gaya</span></span><em>logs the thing you obviously mean</em></div>
+      <div class="cheat"><span class="keys"><span class="say">2</span><span class="say">had 2 glasses</span></span><em>logs that many glasses</em></div>
+      <div class="cheat"><span class="keys"><span class="say">snooze</span></span><em>back in an hour</em></div>
+      <div class="cheat"><span class="keys"><span class="say">skip</span></span><em>skips today, streak freezes</em></div>
+      <div class="cheat"><span class="keys"><span class="say">status</span></span><em>progress + streaks + points</em></div>
+      <div class="cheat"><span class="keys"><span class="say">redeem</span></span><em>see &amp; claim rewards</em></div>
+      <div class="cheat"><span class="keys"><span class="say">remind me to … at …</span></span><em>personal reminder</em></div>
+      <div class="cheat"><span class="keys"><span class="say">reminders</span><span class="say">cancel reminder 3</span></span><em>list them · cancel one</em></div>
+      <div class="cheat"><span class="keys"><span class="say">rough day</span></span><em>gentle mode till tomorrow</em></div>
+      <div class="cheat"><span class="keys"><span class="say">be nicer</span><span class="say">roast me</span><span class="say">pet mode</span></span><em>new personality, instantly</em></div>
     </div>
   </section>
 
