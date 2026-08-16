@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Habitbot Handbook</title>
+<style>
+  :root {
+    --paper: #F3FAF8;
+    --card: #FFFFFF;
+    --ink: #143237;
+    --dim: #587D7B;
+    --accent: #0B8C8C;
+    --accent-soft: #DDF1EE;
+    --warm: #DE6E52;
+    --warm-soft: #FBEDE7;
+    --line: #D9EAE6;
+    --bubble-her: #0B8C8C;
+    --bubble-her-ink: #F3FAF8;
+  }
+  :root:not([data-theme="light"]) { }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0C1D1F;
+      --card: #132A2D;
+      --ink: #DFF0ED;
+      --dim: #8FB0AC;
+      --accent: #46C4C2;
+      --accent-soft: #17393B;
+      --warm: #F2937A;
+      --warm-soft: #3A2620;
+      --line: #23423F;
+      --bubble-her: #0F6B6B;
+      --bubble-her-ink: #E7F5F3;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0C1D1F;
+    --card: #132A2D;
+    --ink: #DFF0ED;
+    --dim: #8FB0AC;
+    --accent: #46C4C2;
+    --accent-soft: #17393B;
+    --warm: #F2937A;
+    --warm-soft: #3A2620;
+    --line: #23423F;
+    --bubble-her: #0F6B6B;
+    --bubble-her-ink: #E7F5F3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Seravek", "Segoe UI", system-ui, -apple-system, sans-serif;
+    font-size: 16.5px;
+    line-height: 1.65;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 40px 20px 72px; }
+  h1, h2 {
+    font-family: ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN", Quicksand, "Segoe UI", sans-serif;
+    text-wrap: balance;
+    line-height: 1.2;
+  }
+  h1 { font-size: 2.1rem; margin: 10px 0 8px; letter-spacing: -0.01em; }
+  h2 { font-size: 1.28rem; margin: 0 0 10px; }
+  .eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .lede { color: var(--dim); font-size: 1.05rem; margin: 0 0 10px; }
+  section {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 22px 22px 20px;
+    margin-top: 18px;
+  }
+  p { margin: 0.55em 0; }
+  ul { margin: 0.55em 0; padding-left: 1.2em; }
+  li { margin: 0.3em 0; }
+  .say {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.86em;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 7px;
+    padding: 1px 7px;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  /* chat demo */
+  .chat { display: flex; flex-direction: column; gap: 8px; margin: 14px 0 6px; }
+  .b {
+    max-width: 85%;
+    padding: 9px 14px;
+    border-radius: 16px;
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+  .her { align-self: flex-end; background: var(--bubble-her); color: var(--bubble-her-ink); border-bottom-right-radius: 5px; }
+  .bot { align-self: flex-start; background: var(--paper); border: 1px solid var(--line); border-bottom-left-radius: 5px; }
+  .btnrow { align-self: flex-start; display: flex; gap: 6px; flex-wrap: wrap; }
+  .btn {
+    font-size: 0.8rem;
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+    border-radius: 999px;
+    padding: 3px 11px;
+    font-weight: 600;
+  }
+  /* persona pills */
+  .pills { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0 4px; }
+  .pill {
+    flex: 1 1 150px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    border-radius: 14px;
+    padding: 12px 14px;
+  }
+  .pill b { display: block; font-size: 1rem; }
+  .pill span { color: var(--dim); font-size: 0.86rem; line-height: 1.4; display: block; margin-top: 2px; }
+  /* rewards card */
+  .rewards { border-color: var(--warm); background: linear-gradient(0deg, var(--warm-soft), var(--card) 55%); }
+  .rewards .eyebrow { color: var(--warm); }
+  /* cheat sheet */
+  .cheats { display: grid; grid-template-columns: 1fr; gap: 0; margin-top: 8px; }
+  .cheat {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 14px;
+    padding: 8px 2px; border-bottom: 1px solid var(--line);
+  }
+  .cheat:last-child { border-bottom: none; }
+  .cheat em { font-style: normal; color: var(--dim); font-size: 0.9rem; text-align: right; }
+  .fine { color: var(--dim); font-size: 0.92rem; }
+  .love {
+    text-align: center;
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-size: 1.12rem;
+    color: var(--warm);
+    margin-top: 34px;
+  }
+  .hero-otter { font-size: 2.6rem; line-height: 1; }
+  @media (max-width: 480px) { .wrap { padding-top: 28px; } h1 { font-size: 1.8rem; } }
+</style>
+
+<div class="wrap">
+  <div class="hero-otter">🦦💧</div>
+  <h1>The Habitbot Handbook</h1>
+  <p class="lede">Someone who loves you built you a little companion. It lives in your WhatsApp, and its whole job is taking care of you. Here's everything it can do.</p>
+  <div class="chat">
+    <div class="b bot">Hi! 👋 I'm your new pocket companion — Rishabh built me just for you. Fair warning: there are real-life rewards involved 👀</div>
+  </div>
+
+  <section>
+    <div class="eyebrow">Day one</div>
+    <h2>It asks, you decide</h2>
+    <p>The first time it texts, it asks three things — and nothing is permanent:</p>
+    <div class="pills">
+      <div class="pill"><b>Sassy 😈</b><span>Dramatic. Will roast you lovingly. Duolingo-owl energy.</span></div>
+      <div class="pill"><b>Sweet 🥰</b><span>Soft, warm, endlessly encouraging. Zero guilt.</span></div>
+      <div class="pill"><b>Pet 🦦</b><span>A tiny otter named Bubbles whose happiness runs on your hydration.</span></div>
+    </div>
+    <p>Plus <b>English or Hinglish</b>, and <b>your awake hours</b> — it promises to never text outside them. Change your mind any day: just say <span class="say">be nicer</span>, <span class="say">roast me</span>, or <span class="say">pet mode</span>.</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">Every day</div>
+    <h2>The rhythm</h2>
+    <ul>
+      <li><b>Morning hello</b> — today's plan, your streaks, and the real weather (hot days = it lobbies for bonus glasses).</li>
+      <li><b>Water, paced to your day</b> — and here's the deal: <b>when you're on track, it stays completely silent.</b> It only pipes up when you fall behind.</li>
+      <li><b>Vitamin days</b> — every other day. You never have to remember which day it is; it knows.</li>
+      <li><b>Ignore it and it gets theatrical</b> — progressively more dramatic (this is a feature), then it says its final word and drops it for the day. It can take a hint.</li>
+      <li><b>Sunday 8pm</b> — your weekly report card: a grade, your best day, points, and next week's challenge.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="eyebrow">Logging</div>
+    <h2>One tap. Or one word.</h2>
+    <div class="chat">
+      <div class="b bot">Water check: 3/8, 6h left in the day 💧</div>
+      <div class="btnrow"><span class="btn">💧 +1 glass</span><span class="btn">Snooze 1h</span><span class="btn">Skip today</span></div>
+      <div class="b her">had 2 glasses</div>
+      <div class="b bot">Logged — 5/8. Look at you go 💧</div>
+    </div>
+    <p>It understands you: <span class="say">done</span> · <span class="say">2</span> · <span class="say">ho gaya</span> · <span class="say">had 2 glasses</span></p>
+  </section>
+
+  <section>
+    <div class="eyebrow">No guilt allowed</div>
+    <h2>Skip, snooze, rough days</h2>
+    <ul>
+      <li><span class="say">snooze</span> — it comes back in an hour.</li>
+      <li><span class="say">skip</span> — today doesn't count against you. Your streak <b>freezes instead of breaking</b>. Skips are honest days, not failures.</li>
+      <li><span class="say">rough day</span> — instant gentle mode until tomorrow morning: no drama, barely any reminders. It takes this one seriously.</li>
+    </ul>
+  </section>
+
+  <section class="rewards">
+    <div class="eyebrow">The good part</div>
+    <h2>Streaks unlock actual prizes</h2>
+    <p>Completed habits build <b>streaks</b>; full days are <b>perfect days</b>; everything earns <b>points</b>. And at streak milestones — 3 days, 7 days, 14 — you unlock <b>real rewards, funded by Rishabh</b>. Massages. Dinners. No-questions-asked favors. Some arrive with a voice note. 👀</p>
+    <div class="chat">
+      <div class="b her">redeem</div>
+      <div class="b bot">🎁 Your earned rewards:<br>1. 1x back massage from Rishabh<br><br>Reply with a number to cash in. He gets notified. He has to pay up.</div>
+    </div>
+    <p class="fine">This is legally binding (emotionally).</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">Also</div>
+    <h2>Your personal reminder assistant</h2>
+    <div class="chat">
+      <div class="b her">remind me to call mom at 5</div>
+      <div class="b bot">Noted! I'll poke you today 17:00: "call mom" ⏰</div>
+    </div>
+    <p><span class="say">reminders</span> shows everything queued · <span class="say">cancel reminder 3</span> cancels one. These always come through — even in gentle mode. (They land on the quarter-hour, so "5pm" means "around 5pm".)</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">And honestly</div>
+    <h2>Just talk to it</h2>
+    <p><span class="say">status</span> shows your whole day at a glance. Beyond that — chat with it. It has opinions. It remembers your vibe.</p>
+    <p>Yes, you can ask it about Rishabh. Go ahead. Try to trick it. See what happens.</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">Cheat sheet</div>
+    <h2>Everything it understands</h2>
+    <div class="cheats">
+      <div class="cheat"><span class="say">done · ho gaya</span><em>logs the thing you obviously mean</em></div>
+      <div class="cheat"><span class="say">2 · had 2 glasses</span><em>logs that many glasses</em></div>
+      <div class="cheat"><span class="say">snooze</span><em>back in an hour</em></div>
+      <div class="cheat"><span class="say">skip</span><em>skips today, streak freezes</em></div>
+      <div class="cheat"><span class="say">status</span><em>progress + streaks + points</em></div>
+      <div class="cheat"><span class="say">redeem</span><em>see &amp; claim rewards</em></div>
+      <div class="cheat"><span class="say">remind me to … at …</span><em>personal reminder</em></div>
+      <div class="cheat"><span class="say">reminders</span><em>list them · cancel by number</em></div>
+      <div class="cheat"><span class="say">rough day</span><em>gentle mode till tomorrow</em></div>
+      <div class="cheat"><span class="say">be nicer · roast me · pet mode</span><em>new personality, instantly</em></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Fine print</div>
+    <p class="fine">It sleeps when you sleep — zero messages outside your hours. If it ever feels like too much: <span class="say">snooze</span>, <span class="say">skip</span>, or <span class="say">rough day</span> — it genuinely listens. Or complain to the management; the management is <i>extremely</i> motivated to keep you happy.</p>
+  </section>
+
+  <p class="love">Built with an unreasonable amount of love.</p>
+</div>
+
+</html>
