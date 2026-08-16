@@ -69,7 +69,7 @@ Nothing is permanent. Any day, just tell it: **"be nicer"**, **"roast me"**, or 
 ## Fine print
 
 - It sleeps when you sleep — zero messages outside your chosen hours.
-- Reminders land on the quarter-hour, so "5pm" means "around 5pm".
+- Reminders arrive within a few minutes of the time you asked for.
 - If it ever feels like too much: `snooze`, `skip`, or `rough day` — it genuinely listens. (Or complain to the management. The management is very motivated to keep you happy.)
 
 *Built with an unreasonable amount of love.* 💙

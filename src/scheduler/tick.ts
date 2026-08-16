@@ -40,7 +40,8 @@ export async function runTick(deps: TickDeps, opts: { force?: boolean } = {}): P
   const player = await repo.getPlayer(db);
   if (!player) return { ran: false, reason: 'no_player', sent: [] };
 
-  if (!opts.force && !(await repo.acquireTickLock(db, now.getTime(), 5 * 60_000))) {
+  // Stale threshold must sit under the cron cadence (5 min) or ticks self-block.
+  if (!opts.force && !(await repo.acquireTickLock(db, now.getTime(), 4 * 60_000))) {
     return { ran: false, reason: 'locked', sent: [] };
   }
 
