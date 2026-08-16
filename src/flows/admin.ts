@@ -2,6 +2,7 @@ import { addDays, localDay } from '../core/clock';
 import { serializeConvoState } from '../core/convo';
 import type { Habit, HabitLog, User } from '../core/types';
 import { repo } from '../db/repo';
+import { CONFIG } from '../env';
 import { recomputeStreak } from '../engine/rollover';
 import { composeMessage } from '../composer/compose';
 import type { MessageBrief } from '../core/types';
@@ -295,7 +296,7 @@ export async function sendTestMessage(deps: TickDeps, admin: User, player: User,
       escalation: 0,
       soft: false,
       facts: { name: player.display_name, dueToday: '💧 Water (8 glasses), 💊 Multivitamin', streaks: 'Water: 4 days' },
-      constraints: { maxChars: 300 },
+      constraints: { maxChars: CONFIG.MAX_CHARS },
     },
     water: {
       kind: 'water_reminder',
@@ -303,7 +304,7 @@ export async function sendTestMessage(deps: TickDeps, admin: User, player: User,
       escalation: 0,
       soft: false,
       facts: { habit: 'Water', done: 2, target: 8, remaining: 6, hoursLeft: 5, streak: 4 },
-      constraints: { maxChars: 300 },
+      constraints: { maxChars: CONFIG.MAX_CHARS },
     },
     vitamin: {
       kind: 'vitamin_reminder',
@@ -311,7 +312,7 @@ export async function sendTestMessage(deps: TickDeps, admin: User, player: User,
       escalation: 1,
       soft: false,
       facts: { habit: 'Multivitamin', emoji: '💊', streak: 2 },
-      constraints: { maxChars: 300 },
+      constraints: { maxChars: CONFIG.MAX_CHARS },
     },
     escalate: {
       kind: 'water_reminder',
@@ -319,7 +320,7 @@ export async function sendTestMessage(deps: TickDeps, admin: User, player: User,
       escalation: 3,
       soft: false,
       facts: { habit: 'Water', done: 1, target: 8, remaining: 7, hoursLeft: 2, streak: 6 },
-      constraints: { maxChars: 300 },
+      constraints: { maxChars: CONFIG.MAX_CHARS },
     },
     coupon: {
       kind: 'coupon_earned',
@@ -327,7 +328,7 @@ export async function sendTestMessage(deps: TickDeps, admin: User, player: User,
       escalation: 0,
       soft: false,
       facts: { title: '1x back massage from Rishabh', label: '7-day Water streak' },
-      constraints: { maxChars: 300 },
+      constraints: { maxChars: CONFIG.MAX_CHARS },
     },
     report: {
       kind: 'report',
@@ -345,7 +346,7 @@ export async function sendTestMessage(deps: TickDeps, admin: User, player: User,
         nextChallengeTitle: 'Full water goal on 6 days',
         nextChallengePoints: 40,
       },
-      constraints: { maxChars: 900 },
+      constraints: { maxChars: CONFIG.MAX_CHARS_REPORT },
     },
     soft: {
       kind: 'soft_ack',
@@ -353,7 +354,7 @@ export async function sendTestMessage(deps: TickDeps, admin: User, player: User,
       escalation: 0,
       soft: true,
       facts: {},
-      constraints: { maxChars: 300 },
+      constraints: { maxChars: CONFIG.MAX_CHARS },
     },
   };
   const brief = briefs[what];

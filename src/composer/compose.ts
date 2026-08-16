@@ -13,7 +13,22 @@ function sanitize(text: string, maxChars: number): string {
   // Strip wrapping quotes the model sometimes adds.
   if ((t.startsWith('"') && t.endsWith('"')) || (t.startsWith('“') && t.endsWith('”'))) t = t.slice(1, -1).trim();
   t = t.replace(/\n{3,}/g, '\n\n');
-  if (t.length > maxChars) t = t.slice(0, maxChars - 1).trimEnd() + '…';
+  if (t.length > maxChars) {
+    // Prefer cutting at the last sentence end; fall back to the last word.
+    const cut = t.slice(0, maxChars);
+    const sentenceEnd = Math.max(
+      cut.lastIndexOf('. '),
+      cut.lastIndexOf('! '),
+      cut.lastIndexOf('? '),
+      cut.lastIndexOf('\n'),
+    );
+    if (sentenceEnd > maxChars * 0.5) {
+      t = cut.slice(0, sentenceEnd + 1).trimEnd();
+    } else {
+      const wordEnd = cut.lastIndexOf(' ');
+      t = (wordEnd > 0 ? cut.slice(0, wordEnd) : cut).trimEnd() + '…';
+    }
+  }
   return t;
 }
 

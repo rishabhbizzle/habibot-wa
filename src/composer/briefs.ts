@@ -25,6 +25,12 @@ export function briefKindFor(d: TickDecision, s: Snapshot): BriefKind {
   }
 }
 
+function maxCharsFor(kind: BriefKind): number {
+  if (kind === 'report') return CONFIG.MAX_CHARS_REPORT;
+  if (kind === 'smalltalk_reply' || kind === 'morning') return CONFIG.MAX_CHARS_CHAT;
+  return CONFIG.MAX_CHARS;
+}
+
 export function buildBrief(d: TickDecision, s: Snapshot, factsOverride?: Facts): MessageBrief {
   const kind = briefKindFor(d, s);
   return {
@@ -33,7 +39,7 @@ export function buildBrief(d: TickDecision, s: Snapshot, factsOverride?: Facts):
     escalation: Math.min(Math.max(d.escalation, 0), 3) as 0 | 1 | 2 | 3,
     soft: isSoft(s.player, s.now),
     facts: factsOverride ?? d.facts,
-    constraints: { maxChars: kind === 'report' ? CONFIG.MAX_CHARS_REPORT : CONFIG.MAX_CHARS },
+    constraints: { maxChars: maxCharsFor(kind) },
   };
 }
 
@@ -45,6 +51,6 @@ export function replyBrief(kind: BriefKind, user: User, nowMs: number, facts: Fa
     escalation: 0,
     soft: isSoft(user, nowMs),
     facts,
-    constraints: { maxChars: kind === 'report' ? CONFIG.MAX_CHARS_REPORT : CONFIG.MAX_CHARS },
+    constraints: { maxChars: maxCharsFor(kind) },
   };
 }

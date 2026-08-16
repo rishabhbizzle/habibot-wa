@@ -43,8 +43,9 @@ export const CONFIG = {
   PACING_GAP_MIN: 60,
   PACING_GAP_MAX: 180,
   PACING_TOLERANCE: 1,
-  // Message constraints
-  MAX_CHARS: 300,
+  // Message constraints (WhatsApp's real cap is 4096; these keep the bot snappy)
+  MAX_CHARS: 480,
+  MAX_CHARS_CHAT: 650,
   MAX_CHARS_REPORT: 900,
   // Alerts
   SEND_FAIL_ALERT_AFTER: 3,
