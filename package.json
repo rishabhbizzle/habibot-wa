@@ -1,0 +1,35 @@
+{
+  "name": "habitbot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "simulate": "tsx scripts/simulate.ts",
+    "typecheck": "tsc --noEmit",
+    "db:migrate:local": "wrangler d1 execute habitbot --local --file=migrations/0001_init.sql && wrangler d1 execute habitbot --local --file=migrations/0002_reminders.sql && wrangler d1 execute habitbot --local --file=migrations/0003_about.sql",
+    "db:seed:local": "wrangler d1 execute habitbot --local --file=seed/seed.sql",
+    "db:migrate:remote": "wrangler d1 execute habitbot --remote --file=migrations/0001_init.sql && wrangler d1 execute habitbot --remote --file=migrations/0002_reminders.sql && wrangler d1 execute habitbot --remote --file=migrations/0003_about.sql",
+    "db:seed:remote": "wrangler d1 execute habitbot --remote --file=seed/seed.sql"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.116.0",
+    "hono": "^4.6.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260811.0",
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/node": "^22.10.0",
+    "better-sqlite3": "^12.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0",
+    "wrangler": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

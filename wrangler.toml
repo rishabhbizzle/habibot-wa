@@ -1,0 +1,48 @@
+# Cloudflare Worker config.
+# After `wrangler d1 create habitbot`, paste the database_id below.
+name = "habitbot"
+main = "src/index.ts"
+compatibility_date = "2026-08-01"
+
+[triggers]
+crons = ["*/15 * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "habitbot"
+database_id = "6b95532b-015c-4bf6-874b-bbbdc6a92ebe"
+
+# Static assets: files under ./public are served at the worker's public URL.
+# Voice notes go in ./public/media/*.ogg -> https://<worker>.workers.dev/media/<name>.ogg
+[assets]
+directory = "./public"
+
+[vars]
+# 1 = every outbound message is rerouted to the admin's WhatsApp with a [to:gf] prefix.
+TEST_MODE = "0"
+# 1 = skip the Graph API entirely (messages recorded as 'dryrun' in D1).
+DRY_RUN = "0"
+# claude-haiku-4-5 (~$2-3/mo) or claude-opus-5 (best persona wit, ~$10-15/mo).
+LLM_MODEL = "claude-haiku-4-5"
+# Approved utility template used to reopen the 24h window ("hello_world" as a
+# pre-approved fallback while waiting on review).
+TEMPLATE_NAME = "morning_checkin"
+# Must match the template's language EXACTLY as shown in WhatsApp Manager:
+# "English" -> "en", "English (US)" -> "en_US". Mismatch = Meta error 132001.
+TEMPLATE_LANG = "en"
+GRAPH_VERSION = "v23.0"
+# Set after first deploy, e.g. https://habitbot.<account>.workers.dev (used for voice-note links).
+PUBLIC_BASE_URL = "https://habitbot.rishabhjainyt.workers.dev"
+# 1 = accept webhooks without X-Hub-Signature-256 (local curl testing ONLY — never in prod).
+DEV_SKIP_SIGNATURE = "0"
+# Her city, for the weather-aware morning brief (Open-Meteo, free, no key).
+# Default: New Delhi. Leave both empty to disable weather entirely.
+WEATHER_LAT = "28.6139"
+WEATHER_LON = "77.2090"
+
+# Secrets (set with `wrangler secret put <NAME>`):
+#   WA_TOKEN            permanent System User access token
+#   WA_PHONE_ID         the test number's Phone Number ID
+#   WA_APP_SECRET       Meta app secret (webhook signature verification)
+#   WA_VERIFY_TOKEN     any random string; must match the value entered in Meta's webhook config
+#   ANTHROPIC_API_KEY   from console.anthropic.com
