@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { decide } from '../src/scheduler/decisions';
 import { istMs } from './helpers/fakes';
-import { DAY, log, mkSnap, mkStreak, mkUser, nudge } from './helpers/snapshots';
+import { DAY, log, mkSnap, mkStreak, mkUser, mkVitamin, nudge } from './helpers/snapshots';
 
 const vitaminDone = log('multivitamin', 1, '09:40');
 
@@ -97,6 +97,24 @@ describe('decide() — golden day', () => {
     const d = decide(s);
     expect(d[0]).toMatchObject({ kind: 'streak_save', habitId: 'water' });
     expect(d[0].facts).toMatchObject({ streak: 5, minutesLeft: 90 });
+  });
+
+  it('never panics about a fixed-time habit before its hour (23:45 oats at 20:00)', () => {
+    const oats = mkVitamin({
+      id: 'soak_oats',
+      name: 'Soak oats',
+      schedule_type: 'daily',
+      interval_days: null,
+      anchor_date: null,
+      anchor_time: '23:45',
+      nag_min_gap_min: 30,
+    });
+    const s = mkSnap('20:00', {
+      habits: [oats],
+      nudgesToday: [nudge('morning', '09:00')],
+      streaks: { soak_oats: mkStreak('soak_oats', 5) },
+    });
+    expect(decide(s)).toEqual([]); // no streak_save, no reminder until 23:45
   });
 
   it('switches to catch-up mode late in the day when no streak is at risk', () => {

@@ -66,6 +66,8 @@ export function decide(s: Snapshot): TickDecision[] {
   if (!soft && s.localMin >= wakeEnd - CONFIG.STREAK_SAVE_WINDOW_MIN) {
     for (const h of due) {
       if (isComplete(h, logsFor(h.id)) || isSkipped(h.id, s.logsToday) || snoozedNow(h.id)) continue;
+      // A fixed-time habit isn't "at risk" before its own hour arrives.
+      if (h.pacing === 'once' && h.anchor_time && s.localMin < hmToMin(h.anchor_time)) continue;
       const streak = s.streaks[h.id]?.current ?? 0;
       if (streak < CONFIG.STREAK_SAVE_MIN_STREAK) continue;
       if (sent.some((n) => n.kind === 'streak_save' && n.habit_id === h.id)) continue;
