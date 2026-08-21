@@ -36,6 +36,7 @@ Nothing is permanent. Any day, just tell it: **"be nicer"**, **"roast me"**, or 
 - Completing a habit builds its **streak**; completing everything makes a **perfect day**; everything earns **points**.
 - At streak milestones (3 days, 7 days, 14…) you unlock **rewards — real ones, funded by Rishabh**. Massages, dinners, no-questions-asked favors. Some arrive with a voice note. 👀
 - Text **`redeem`** anytime to see what you've earned and cash it in. He gets notified. He has to pay up. This is legally binding (emotionally).
+- And sometimes a reward will just… appear. No streak, no reason. That one's him, not the bot. 💙
 
 ## It's also your personal reminder assistant
 

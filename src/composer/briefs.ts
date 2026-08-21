@@ -27,7 +27,7 @@ export function briefKindFor(d: TickDecision, s: Snapshot): BriefKind {
 
 function maxCharsFor(kind: BriefKind): number {
   if (kind === 'report') return CONFIG.MAX_CHARS_REPORT;
-  if (kind === 'smalltalk_reply' || kind === 'morning') return CONFIG.MAX_CHARS_CHAT;
+  if (kind === 'smalltalk_reply' || kind === 'morning' || kind === 'coupon_gifted') return CONFIG.MAX_CHARS_CHAT;
   return CONFIG.MAX_CHARS;
 }
 

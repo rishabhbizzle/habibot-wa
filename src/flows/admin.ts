@@ -9,6 +9,7 @@ import type { MessageBrief } from '../core/types';
 import { windowOpen } from '../scheduler/snapshot';
 import { runTick, type TickDeps } from '../scheduler/tick';
 import type { InboundMessage } from '../webhook/parse';
+import { giftCoupon } from './coupons';
 import { startOnboarding } from './onboarding';
 import { performLog, nextWakeStartMs } from './logging';
 import { sendPlain } from './reply';
@@ -27,6 +28,8 @@ const HELP = `habitbot admin commands:
 /habit list|pause <id>|resume <id>
 /coupon add "Title" trigger=streak:7 [media=file.ogg]
 /coupon list
+/gift "Title" | optional note — unlock a surprise reward right now
+/gift 7 | optional note — gift a stocked coupon early
 /test morning|water|vitamin|report|coupon|escalate
 /recount — rebuild streaks from logs
 /export — table counts`;
@@ -240,6 +243,37 @@ export async function handleAdmin(deps: TickDeps, admin: User, msg: InboundMessa
           nowMs,
         );
       }
+      return;
+    }
+
+    case 'gift': {
+      const byTitle = arg.match(/^"([^"]+)"(?:\s*\|\s*(.+))?$/);
+      const byId = arg.match(/^#?(\d{1,6})(?:\s*\|\s*(.+))?$/);
+      if (!byTitle && !byId) {
+        await sendPlain(
+          deps,
+          admin,
+          'Usage:\n/gift "One free hug, on demand" | just because\n/gift 7 | early, you earned it in spirit\n\n(/coupon list shows the ids)',
+          nowMs,
+        );
+        return;
+      }
+      const note = (byTitle ? byTitle[2] : byId?.[2]) ?? null;
+      const res = byTitle
+        ? await giftCoupon(deps, player, { title: byTitle[1], note }, now)
+        : await giftCoupon(deps, player, { id: Number(byId![1]), note }, now);
+      if (!res.ok) {
+        await sendPlain(deps, admin, `Couldn't gift that: ${res.error}`, nowMs);
+        return;
+      }
+      await sendPlain(
+        deps,
+        admin,
+        res.announced
+          ? `🎁 Gifted "${res.coupon?.title}" — she's been told. She can "redeem" it whenever.`
+          : `🎁 Gifted "${res.coupon?.title}". Her 24h window is closed, so it'll be announced in tomorrow's morning message.`,
+        nowMs,
+      );
       return;
     }
 

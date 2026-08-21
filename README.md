@@ -116,7 +116,7 @@ Her number must already be a **code-verified test recipient** in Meta's dashboar
 
 ## Day-2 operations (all over WhatsApp, from your number)
 
-`/status` · `/soft on|off` · `/pause 4h` · `/resume` · `/log water 2` · `/habit list|pause|resume` · `/coupon add "..." trigger=streak:7|perfect_week:7|any [media=x.ogg]` · `/coupon list` · `/recount` · `/export` · `/tick` · `/test …`
+`/status` · `/soft on|off` · `/pause 4h` · `/resume` · `/log water 2` · `/habit list|pause|resume` · `/coupon add "..." trigger=streak:7|perfect_week:7|any [media=x.ogg]` · `/coupon list` · `/gift "..." | note` (unlock a reward instantly, no milestone needed) · `/gift 7 | note` (gift a stocked one early) · `/recount` · `/export` · `/tick` · `/test …`
 
 She can text the bot naturally: `done`, `ho gaya`, `2`, `had 2 glasses`, `snooze`, `skip`, `status`, `redeem`, `be nicer`, `roast me`, `not today please` (instant soft mode) — buttons always work even if the LLM is down.
 

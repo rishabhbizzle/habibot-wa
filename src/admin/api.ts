@@ -7,6 +7,7 @@ import { repo } from '../db/repo';
 import { doneUnits, isComplete, isSkipped } from '../engine/game';
 import { isDueOn } from '../engine/schedule';
 import { sendTestMessage } from '../flows/admin';
+import { giftCoupon } from '../flows/coupons';
 import { nextWakeStartMs } from '../flows/logging';
 import { isSoft } from '../scheduler/decisions';
 import { windowOpen } from '../scheduler/snapshot';
@@ -159,6 +160,27 @@ adminApi.post('/coupons', async (c) => {
     created_at: Date.now(),
   });
   return c.json({ ok: true, id });
+});
+
+adminApi.post('/coupons/gift', async (c) => {
+  const deps = await buildDeps(c.env);
+  const player = await repo.getPlayer(deps.db);
+  if (!player) return c.json({ error: 'no player' }, 500);
+  const b = (await c.req.json()) as { id?: number; title?: string; note?: string; media_ref?: string };
+  const res = await giftCoupon(
+    deps,
+    player,
+    b.id
+      ? { id: Number(b.id), note: b.note ?? null }
+      : { title: String(b.title ?? ''), note: b.note ?? null, media: b.media_ref ?? null },
+    new Date(),
+  );
+  if (!res.ok) return c.json({ error: res.error ?? 'gift failed' }, 400);
+  return c.json({
+    ok: true,
+    announced: res.announced,
+    note: res.announced ? 'She has been told.' : 'Her 24h window is closed — it will be announced tomorrow morning.',
+  });
 });
 
 adminApi.post('/coupons/delete', async (c) => {

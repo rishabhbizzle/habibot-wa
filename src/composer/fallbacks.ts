@@ -27,6 +27,10 @@ const TEMPLATES: Record<BriefKind, string[]> = {
   habit_complete: ['{emoji} {habit} DONE for today. +{points} pts!', 'That’s a wrap on {habit} today {emoji} +{points} pts'],
   milestone: ['🔥 {label}! Genuinely impressive.'],
   coupon_earned: ['🎁 Reward unlocked: {title}. Text "redeem" whenever you want to cash it in.'],
+  coupon_gifted: [
+    '🎁 Surprise — Rishabh just unlocked something for you, no streak required: "{title}" {noteFromRishabh} Text "redeem" whenever.',
+    '🎁 Special delivery, straight from Rishabh (you didn\'t even have to earn this one): "{title}" {noteFromRishabh} Say "redeem" to claim it.',
+  ],
   report: [
     '📊 Weekly report\nGrade: {grade} ({overallPct}%)\n{perHabit}\nPerfect days: {perfectDays} | Best day: {bestDay}\nPoints this week: {pointsEarned}\n{challengeLine}\nNext challenge: {nextChallengeTitle} (+{nextChallengePoints} pts)',
   ],

@@ -194,6 +194,45 @@ export const repo = {
     return res.lastRowId ?? 0;
   },
 
+  /** Create a coupon already unlocked — a surprise gift, never in the stocked pool. */
+  async insertGiftedCoupon(
+    db: Db,
+    c: { user_id: string; title: string; description: string | null; media_ref: string | null; now: number },
+  ): Promise<number> {
+    const res = await db.run(
+      `INSERT INTO coupons (user_id, title, description, status, trigger_type, trigger_value, media_ref,
+         earned_at, earned_for, announced, created_at)
+       VALUES (?, ?, ?, 'earned', 'any', NULL, ?, ?, 'gift', 0, ?)`,
+      c.user_id,
+      c.title,
+      c.description,
+      c.media_ref,
+      c.now,
+      c.now,
+    );
+    return res.lastRowId ?? 0;
+  },
+
+  /** Unlock a stocked coupon early, as a gift. */
+  async giftStockedCoupon(db: Db, id: number, userId: string, now: number): Promise<boolean> {
+    const res = await db.run(
+      `UPDATE coupons SET status = 'earned', earned_at = ?, earned_for = 'gift', announced = 0
+       WHERE id = ? AND user_id = ? AND status = 'stocked'`,
+      now,
+      id,
+      userId,
+    );
+    return res.changes > 0;
+  },
+
+  async markCouponAnnounced(db: Db, id: number): Promise<void> {
+    await db.run('UPDATE coupons SET announced = 1 WHERE id = ?', id);
+  },
+
+  getCoupon(db: Db, id: number, userId: string): Promise<Coupon | null> {
+    return db.first<Coupon>('SELECT * FROM coupons WHERE id = ? AND user_id = ?', id, userId);
+  },
+
   markCouponEarnedStmt(id: number, earnedFor: string, now: number) {
     return {
       sql: `UPDATE coupons SET status = 'earned', earned_at = ?, earned_for = ? WHERE id = ? AND status = 'stocked'`,

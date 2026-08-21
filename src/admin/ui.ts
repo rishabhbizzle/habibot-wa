@@ -88,6 +88,15 @@ export const ADMIN_HTML = `<!doctype html>
       <div><label>Voice note file</label><input id="cMedia" placeholder="note1.ogg (optional)"></div>
       <div style="align-self:end"><button class="primary" onclick="addCoupon()">Stock it</button></div>
     </div>
+    <div style="border-top:1px solid var(--line); margin-top:16px; padding-top:12px">
+      <label>🎁 Gift one right now — no streak, no milestone, just because</label>
+      <div class="frm">
+        <div class="wide"><label>Title</label><input id="gTitle" placeholder="One free hug, on demand"></div>
+        <div class="wide"><label>Note from you (optional)</label><input id="gNote" placeholder="just because I felt like it"></div>
+        <div style="align-self:end"><button class="primary" onclick="giftNew()">Gift it now</button></div>
+      </div>
+      <p class="sub" style="margin:6px 0 0">Or tap 🎁 next to any stocked coupon to unlock it early.</p>
+    </div>
   </div>
 
   <h2>Her settings</h2>
@@ -167,7 +176,7 @@ function render(){
   var cp='';
   S.coupons.forEach(function(cn){
     var chip = cn.status==='stocked'?'<span class="chip">stocked</span>':cn.status==='earned'?'<span class="chip ok">earned 🎉</span>':'<span class="chip warn">redeemed</span>';
-    var del = cn.status==='stocked'?' <button class="danger" onclick="delCoupon('+cn.id+')">✕</button>':'';
+    var del = cn.status==='stocked'?' <button onclick="giftExisting('+cn.id+')" title="Gift this now">🎁</button> <button class="danger" onclick="delCoupon('+cn.id+')">✕</button>':'';
     cp += '<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0"><div>'+esc(cn.title)
       +' <span class="sub">('+esc(cn.trigger_type)+(cn.trigger_value?':'+cn.trigger_value:'')+(cn.media_ref?' · 🎙 '+esc(cn.media_ref):'')+')</span></div><div>'+chip+del+'</div></div>';
   });
@@ -223,6 +232,16 @@ function addCoupon(){
   .then(function(){ toast('Coupon stocked'); document.getElementById('cTitle').value=''; load(); });
 }
 function delCoupon(id){ if(confirm('Delete this coupon?')) api('/coupons/delete',{id:id}).then(function(){ load(); }); }
+function giftNew(){
+  var t=document.getElementById('gTitle').value.trim();
+  if(!t){ toast('Give it a title first'); return; }
+  api('/coupons/gift',{ title:t, note:document.getElementById('gNote').value })
+  .then(function(r){ toast('🎁 Gifted! '+r.note); document.getElementById('gTitle').value=''; document.getElementById('gNote').value=''; load(); });
+}
+function giftExisting(id){
+  if(!confirm('Unlock this coupon for her right now?')) return;
+  api('/coupons/gift',{id:id}).then(function(r){ toast('🎁 Gifted! '+r.note); load(); });
+}
 function mode(m){ api('/mode',m).then(function(){ toast('Done'); load(); }); }
 function tick(){ api('/tick',{}).then(function(r){ toast('Tick: '+(r.sent&&r.sent.length? r.sent.map(function(s){return s.kind;}).join(', '):'nothing to send')); load(); }); }
 function testMsg(){ api('/test',{what:document.getElementById('testSel').value}).then(function(){ toast('Sent to your WhatsApp'); }); }

@@ -168,6 +168,7 @@ export type BriefKind =
   | 'habit_complete'
   | 'milestone'
   | 'coupon_earned'
+  | 'coupon_gifted'
   | 'report'
   | 'redeem_confirm'
   | 'reminder_set'
